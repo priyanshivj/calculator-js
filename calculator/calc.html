@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,300;1,300&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    body {
+      background: linear-gradient(#cdb4db, white);
+      font-family: "Titillium Web", sans-serif;
+    }
+
+    button {
+      font-family: "Titillium Web", sans-serif;
+      font-size: 2rem;
+      border: 1.5mm outset #a2d2ff;
+      background-color: #cdb4db;
+      margin: 2px;
+      border-radius: 20px;
+    }
+
+    button:hover {
+      background-color: #a2d2ff;
+    }
+
+    button:active {
+      background-color: #a2d2ff;
+    }
+
+    .calculator {
+      display: grid;
+      justify-content: center;
+      grid-template-columns: repeat(4, 80px);
+      align-content: center;
+      min-height: 100vh;
+      grid-template-rows: minmax(120px, auto) repeat(5, 80px);
+    }
+
+    .clear {
+      grid-column-start: 1;
+      grid-column-end: 3;
+    }
+
+    .equals {
+      grid-column-start: 3;
+      grid-column-end: 5;
+    }
+
+    .output {
+      background-color: #ffafcc;
+      color: black;
+      border: 1.5mm outset #a2d2ff;
+      border-radius: 20px;
+      margin: 2px;
+      grid-column-start: 1;
+      grid-column-end: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding-right: 5px;
+      min-height: 10vh;
+    }
+
+    .current-operand {
+      font-size: 2.5rem;
+      flex-wrap: wrap;
+      display: inline-flex;
+    }
+
+    .previous-operand {
+      font-size: 2rem;
+    }
+  </style>
+
+  <body>
+    <div class="calculator">
+      <div class="output">
+        <div id="previousOperand" class="previous-operand"></div>
+
+        <div id="currentOperand" class="current-operand">0</div>
+      </div>
+      <button id="allClear" class="clear">AC</button>
+      <button id="delete">DEL</button>
+      <button id="operator">÷</button>
+      <button id="number">1</button>
+      <button id="number">2</button>
+      <button id="number">3</button>
+      <button id="operator">×</button>
+      <button id="number">4</button>
+      <button id="number">5</button>
+      <button id="number">6</button>
+      <button id="operator">+</button>
+      <button id="number">7</button>
+      <button id="number">8</button>
+      <button id="number">9</button>
+      <button id="operator">-</button>
+      <button id="number" name="decimal">.</button>
+      <button id="number">0</button>
+      <button id="equals" class="equals">=</button>
+    </div>
+
+    <script>
+      const numberButtons = document.querySelectorAll("#number");
+      const operationButtons = document.querySelectorAll("#operator");
+      const equalsButton = document.querySelector("#equals");
+      const allClearButton = document.querySelector("#allClear");
+      const deleteButton = document.querySelector("#delete");
+      const previousOperand = document.querySelector("#previousOperand");
+      const currentOperand = document.querySelector("#currentOperand");
+
+      //function when a button is clicked
+      function append(num) {
+        if (currentOperand.innerHTML === "0") {
+          currentOperand.innerHTML = num.innerHTML;
+        } else {
+          currentOperand.innerHTML += num.innerHTML;
+        }
+      }
+      //what should happen when someone clicks a number button?
+      for (let num of numberButtons) {
+        num.addEventListener("click", function (e) {
+          if (num.innerHTML === "." && currentOperand.innerHTML.includes(".")) {
+            e.target.disabled = true;
+          } else if (currentOperand.innerHTML.length === 12) {
+            numberButtons.disabled = true;
+          } else {
+            append(num);
+          }
+        });
+      }
+      //all clear button functionality
+      allClearButton.addEventListener("click", function (e) {
+        currentOperand.innerHTML = "0";
+        previousOperand.innerHTML = "";
+        document.querySelector('[name="decimal"]').disabled = false;
+      });
+      //delete button functionality
+      deleteButton.addEventListener("click", function (e) {
+        if (currentOperand.innerText.length !== 0) {
+          currentOperand.innerHTML = currentOperand.innerHTML.slice(0, -1);
+          document.querySelector('[name="decimal"]').disabled = false;
+        } else {
+        }
+      });
+
+      for (let operand of operationButtons) {
+        operand.addEventListener("click", function (e) {
+          if (previousOperand.innerHTML.includes("+")) {
+            addition(previousOperand, currentOperand);
+            previousOperand.innerHTML = currentOperand.innerHTML +=
+              operand.innerHTML;
+            currentOperand.innerHTML = "";
+          } else if (previousOperand.innerHTML.includes("-")) {
+            subtraction(previousOperand, currentOperand);
+            previousOperand.innerHTML = currentOperand.innerHTML +=
+              operand.innerHTML;
+            currentOperand.innerHTML = "";
+          } else if (previousOperand.innerHTML.includes("÷")) {
+            division(previousOperand, currentOperand);
+            previousOperand.innerHTML = currentOperand.innerHTML +=
+              operand.innerHTML;
+            currentOperand.innerHTML = "";
+          } else if (previousOperand.innerHTML.includes("×")) {
+            multiply(previousOperand, currentOperand);
+            previousOperand.innerHTML = currentOperand.innerHTML +=
+              operand.innerHTML;
+            currentOperand.innerHTML = "";
+          } else {
+            append(operand);
+            previousOperand.innerHTML += currentOperand.innerHTML;
+            currentOperand.innerHTML = "";
+          }
+        });
+      }
+      //function for computing all operations
+      equalsButton.addEventListener("click", function (e) {
+        if (previousOperand.innerHTML.includes("+")) {
+          addition(previousOperand, currentOperand);
+        } else if (previousOperand.innerHTML.includes("-")) {
+          subtraction(previousOperand, currentOperand);
+        } else if (previousOperand.innerHTML.includes("÷")) {
+          division(previousOperand, currentOperand);
+        } else if (previousOperand.innerHTML.includes("×")) {
+          multiply(previousOperand, currentOperand);
+        }
+      });
+
+      function addition(x, y) {
+        currentOperand.innerHTML =
+          parseFloat(previousOperand.innerHTML) +
+          parseFloat(currentOperand.innerHTML);
+        previousOperand.innerHTML = "";
+      }
+
+      function subtraction(x, y) {
+        currentOperand.innerHTML =
+          parseFloat(previousOperand.innerHTML) -
+          parseFloat(currentOperand.innerHTML);
+        previousOperand.innerHTML = "";
+      }
+
+      function division(x, y) {
+        currentOperand.innerHTML =
+          parseFloat(previousOperand.innerHTML) /
+          parseFloat(currentOperand.innerHTML);
+        previousOperand.innerHTML = "";
+      }
+
+      function multiply(x, y) {
+        currentOperand.innerHTML =
+          parseFloat(previousOperand.innerHTML) *
+          parseFloat(currentOperand.innerHTML);
+        previousOperand.innerHTML = "";
+      }
+    </script>
+  </body>
+</html>
